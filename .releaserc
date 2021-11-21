@@ -1,0 +1,42 @@
+{
+  "branches": [
+    "main",
+    {
+      "name": "beta",
+      "prerelease": true
+    }
+  ],
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/changelog",
+      {
+        "changelogFile": "CHANGELOG.md"
+      }
+    ],
+    "@semantic-release/npm",
+    [
+      "@semantic-release/git",
+      {
+        "assets": [
+          "package.json",
+          "docs/**"
+        ],
+        "message": "chore(release): ${nextRelease.version} \n\n${nextRelease.notes}"
+      }
+    ],
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          {
+            "path": "dist-pkg/*"
+          }
+        ],
+        "successComment": "This ${issue.pull_request ? 'pull request' : 'issue'} is included in version ${nextRelease.version} :rocket:",
+        "failComment": "This release from branch ${branch.name} had failed due to the following errors:\n- ${errors.map(err => err.message).join('\\n- ')}"
+      }
+    ]
+  ]
+}
