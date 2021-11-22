@@ -1,75 +1,80 @@
-import http from "http";
-import URL from "url";
-import ejs from "ejs";
-import type { XOR } from "./types";
+import ejs from 'ejs'
+import { existsSync } from 'fs'
+import http from 'http'
+import { resolve } from 'path'
+import URL from 'url'
+import { createCloseableHttpServer } from './lib/httpserver'
+import type { XOR } from './types'
+
+export type EjsTemplateConfig = XOR<{ raw: string }, { path: string }>
 
 export interface EjsTemplateServerOptions {
   /** The (EJS compatible) HTML template to use when rendering the OG image.
+   * You must specify *only one* of `raw` and `path`.
    * @see https://ejs.co/
    */
-  template: XOR<{ raw: string }, { path: string }>;
+  template: EjsTemplateConfig
   /** The port that the server will try to listen on.
    * @default 8080
    */
-  port?: number;
-  staticParams?: Record<string, string | ((params: unknown) => unknown)>;
+  port?: number
+  staticParams?: Record<string, string | ((params: unknown) => unknown)>
 }
 
 /**
  * Creates a server that is capable of rendering OG images on demand.
  * @param  {EjsTemplateServerOptions} options
- * @returns Promise
+ * @async
+ * @returns {Promise<http.Server>}
  */
 export async function createEjsTemplateServer({
   template,
   port = 8080,
   staticParams,
-}: EjsTemplateServerOptions): Promise<void> {
+}: EjsTemplateServerOptions): Promise<http.Server> {
   if (!template.raw && !template.path) {
-    console.error("No template provided, cannot start OpenGraph server.");
-    return Promise.reject();
+    throw new Error('No template provided, cannot start OpenGraph server.')
   }
 
-  const srv = http
-    .createServer(async (req, res) => {
-      if (req.url) {
-        if (template.path) {
-          try {
-            const html = await ejs.renderFile(template.path, { ...URL.parse(req.url, true).query, ...staticParams }); // prettier-ignore
-            res.end(html);
-          } catch (e: any) {
-            const undefinedError = String(e).match(/.*is not defined/g);
-            if (undefinedError) {
-              console.error("Received invalid request:", undefinedError);
-            } else {
-              console.error(`Unable to read file at '${template.path}'.`, e);
-            }
-            return Promise.reject();
-          }
-        } else if (template.raw) {
-          try {
-            const html = await ejs.render(template.raw, { ...URL.parse(req.url, true).query, ...staticParams }); // prettier-ignore
-            res.end(html);
-          } catch (e) {
-            console.error("The provided template is invalid:", template.raw);
-            return Promise.reject();
-          }
-        }
-      } else {
-        res.end("Invalid url.");
-      }
-    })
-    .listen(port);
+  if (template.path && !existsSync(resolve(template.path))) {
+    throw new Error('ENOENT: Invalid path provided, no template was found')
+  }
 
-  srv.on("listening", () => {
-    console.log(
-      "The EJS Template Server started successfully and is listening for requests to http://localhost:" +
-        port
-    );
-    Promise.resolve();
-  });
-  srv.on("error", (e) => {
-    console.error(e);
-    Promise.reject();
-  });
+  const handleError = (e: Error, res: http.ServerResponse) => {
+    const undefinedError = String(e).match(/.*is not defined/g)
+    if (undefinedError) {
+      console.error('Received invalid request:', undefinedError)
+      res.statusCode = 403
+      res.setHeader('Content-Type', 'application/json').end(JSON.stringify(undefinedError))
+    } else {
+      res.statusCode = 500
+      console.error('An error occurred while trying to respond to a request:', e)
+      res.setHeader('Content-Type', 'application/json').end(JSON.stringify(e))
+    }
+  }
+
+  const srv = createCloseableHttpServer(async (req, res) => {
+    if (req.url) {
+      if (template.path) {
+        try {
+          const html = await ejs.renderFile(template.path, { ...URL.parse(req.url, true).query, ...staticParams }); // prettier-ignore
+
+          return res.end(html)
+        } catch (e: any) {
+          handleError(e, res)
+        }
+      } else if (template.raw) {
+        try {
+          const html = ejs.render(template.raw, { ...URL.parse(req.url, true).query, ...staticParams }); // prettier-ignore
+          return res.end(html)
+        } catch (e: any) {
+          handleError(e, res)
+        }
+      }
+    } else {
+      return res.end('Invalid url.')
+    }
+  }).listen(port)
+
+  return Promise.resolve(srv)
 }
