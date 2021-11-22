@@ -3,7 +3,7 @@ import { existsSync } from 'fs'
 import http from 'http'
 import { resolve } from 'path'
 import URL from 'url'
-import { createCloseableHttpServer } from './lib/httpserver'
+import { createCloseableHttpServer } from './lib/httpserver.js'
 import type { XOR } from './types'
 
 export type EjsTemplateConfig = XOR<{ raw: string }, { path: string }>
