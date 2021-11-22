@@ -5,3 +5,7 @@ tsconfig*.json
 .eslintrc
 scripts
 src
+test
+.prettierrc
+CONTRIBUTING.md
+jest.config.js
