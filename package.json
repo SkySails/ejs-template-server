@@ -24,7 +24,8 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "rimraf -rf dist/* && tsc -p tsconfig.json && tsc -p tsconfig.cjs.json && scripts/fixup.sh",
+    "build": "rimraf -rf dist/* && tsc -p tsconfig.json && tsc -p tsconfig.cjs.json",
+    "postbuild": "./scripts/fixup.sh",
     "prepack": "yarn && yarn build && yarn --production",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",

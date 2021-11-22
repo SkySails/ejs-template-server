@@ -20,7 +20,7 @@ Code quality is set up using `prettier`.
 
 This project is set up to build for both ESM and CJS. This is acheived by having a base tsconfig (`tsconfig.base.json`). This config is then extended by two other tsonfic projects, `tsconfig.json` and `tsconfig.cjs.json`.
 
-The project is then built twice, once with each of the two profiles. The result is one `cjd` and one `esm` folder in `dist`.
+The project is then built twice, once with each of the two profiles. The result is one `cjd` and one `esm` folder in `dist`. After a successful build, `package.json` files will be added to each directory with the correct `type` key set (`commonjs`/`module`).
 
 ## Continuous Integration
 
