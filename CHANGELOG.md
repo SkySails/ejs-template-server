@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/SkySails/ejs-template-server/compare/v1.0.1...v1.0.2) (2021-11-23)
+
+
+### Bug Fixes
+
+* add real useful information to readme ([1c6397b](https://github.com/SkySails/ejs-template-server/commit/1c6397bf7f323ada7fa6caed16408b2dcbd8f702))
+
 ## [1.0.1](v1.0.0...v1.0.1) (2021-11-22)
 
 ### Bug Fixes
