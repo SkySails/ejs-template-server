@@ -1,4 +1,3 @@
-.nodemon.json
 tsconfig*.json
 .github
 .releaserc
