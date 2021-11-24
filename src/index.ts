@@ -18,7 +18,7 @@ export interface EjsTemplateServerOptions {
    * @default 8080
    */
   port?: number
-  staticParams?: Record<string, string | ((params: unknown) => unknown)>
+  staticParams?: Record<string, string | ((params: any) => unknown)>
 }
 
 /**
