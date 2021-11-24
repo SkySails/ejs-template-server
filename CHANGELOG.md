@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/SkySails/ejs-template-server/compare/v1.0.2...v1.0.3) (2021-11-24)
+
+
+### Bug Fixes
+
+* allow any parameters in staticParams function ([67e9016](https://github.com/SkySails/ejs-template-server/commit/67e90167340006f8cbf218a81b559a1a0d6b2d13))
+
 ## [1.0.2](https://github.com/SkySails/ejs-template-server/compare/v1.0.1...v1.0.2) (2021-11-23)
 
 
